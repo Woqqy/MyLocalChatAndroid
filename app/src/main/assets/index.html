@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17212b">
+<title>My Local Chat</title>
+<style>
+:root{color-scheme:dark;--page:#0e1621;--side:#17212b;--surface:#1e2c3a;--surface2:#243443;--line:#263746;--blue:#3390ec;--blue2:#2b7fd3;--text:#f5f7fa;--muted:#8e9eae;--green:#50c878}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--page);color:var(--text);font:14px/1.45 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;display:grid;place-items:center}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.app{width:100%;height:100dvh;max-width:1240px;display:grid;grid-template-columns:330px minmax(0,1fr);background:var(--page);overflow:hidden;box-shadow:0 18px 80px #0005}
+.sidebar{background:var(--side);border-right:1px solid #263442;display:flex;flex-direction:column;min-width:0}
+.side-top{height:70px;display:flex;align-items:center;padding:0 19px;gap:12px;border-bottom:1px solid #ffffff08}
+.brandmark{width:39px;height:39px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#45b5ff,#2584db);box-shadow:0 5px 18px #168de455;color:#fff}
+.brand{font-size:17px;font-weight:750;letter-spacing:-.35px}.brand small{display:block;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#8da3b8;font-weight:650;margin-top:1px}
+.side-caption{padding:20px 18px 9px;color:#71869a;font-size:10px;font-weight:750;letter-spacing:1.25px;text-transform:uppercase}
+.chat-list{padding:0 9px}.chat-item{width:100%;border:0;background:transparent;color:inherit;text-align:left;display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:12px}
+.chat-item.active{background:#2b5278}.chat-avatar{width:48px;height:48px;flex:none;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#3db7e8,#287fd2);font-size:20px;color:white}
+.chat-copy{min-width:0;flex:1}.chat-name{font-size:14px;font-weight:700;margin-bottom:4px}.chat-preview{font-size:12px;color:#9babb9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-item.active .chat-preview{color:#d4e2ee}
+.side-spacer{flex:1}.account{border-top:1px solid #ffffff0b;padding:13px 14px;display:flex;align-items:center;gap:10px}
+.account-avatar{width:39px;height:39px;border-radius:50%;background:#7656c9;display:grid;place-items:center;font-weight:750}
+.account-info{min-width:0;flex:1}.account-name{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.account-tag{font-size:11px;color:var(--muted)}
+.icon-btn{width:36px;height:36px;border:0;border-radius:10px;background:transparent;color:#a9bac8;display:grid;place-items:center}.icon-btn:hover{background:#ffffff10;color:white}
+.chatpane{min-width:0;display:flex;flex-direction:column;position:relative;background:#0e1621}
+.chat-header{height:70px;flex:none;background:#17212b;display:flex;align-items:center;padding:0 22px;gap:13px;border-bottom:1px solid #263442;z-index:1}
+.header-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#3db7e8,#287fd2);font-size:18px}
+.header-info{min-width:0;flex:1}.header-title{font-size:15px;font-weight:720}.header-sub{font-size:12px;color:#7f95a8;margin-top:2px}.header-actions{display:flex;gap:4px}
+#status{color:#57c98a}
+#feed{flex:1;overflow-y:auto;padding:24px clamp(14px,4vw,54px) 18px;background-color:#0e1621;background-image:radial-gradient(#263747 0.65px,transparent .65px);background-size:18px 18px;scroll-behavior:smooth}
+.welcome-pill{width:max-content;max-width:100%;margin:0 auto 22px;padding:7px 13px;border:1px solid #314252;background:#1b2a38;color:#b8c8d6;border-radius:20px;font-size:11px;text-align:center}
+.msgrow{display:flex;margin:8px 0;animation:pop .15s ease-out}.msgrow.mine{justify-content:flex-end}
+@keyframes pop{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:none}}
+.bubble{max-width:min(76%,590px);min-width:85px;padding:9px 12px 6px;border-radius:14px 14px 14px 4px;background:#182533;box-shadow:0 2px 3px #0002;overflow-wrap:anywhere}
+.mine .bubble{background:#2b5278;border-radius:14px 14px 4px 14px}
+.sender{font-size:12px;color:#73c8f4;font-weight:750;margin-bottom:4px}.body{white-space:pre-wrap;word-break:break-word;line-height:1.48;font-size:14px}.meta{text-align:right;font-size:10px;color:#c4d2de99;margin:5px 0 0 13px}
+.empty{max-width:300px;text-align:center;margin:20vh auto 0;color:#91a2b1;line-height:1.6}.empty-icon{width:58px;height:58px;border-radius:50%;margin:0 auto 13px;background:#20384b;display:grid;place-items:center;color:#69bdf5;font-size:25px}.empty b{display:block;color:#e7eef5;font-size:17px;margin-bottom:5px}
+.composer-wrap{flex:none;padding:13px clamp(12px,3vw,34px) 17px;background:linear-gradient(180deg,#0e162100,#0e1621 22%)}#composer{display:flex;align-items:flex-end;gap:10px;max-width:900px;margin:auto;padding:7px 8px 7px 17px;background:#17212b;border:1px solid #2a3a49;border-radius:17px;box-shadow:0 5px 22px #0002}
+#message{resize:none;min-height:42px;max-height:130px;flex:1;background:transparent;border:0;color:#f5f7fa;padding:11px 0;outline:none;font:14px/1.4 Arial,sans-serif}#message::placeholder{color:#7e91a3}
+#send{height:42px;width:44px;flex:none;border:0;border-radius:13px;background:var(--blue);color:#fff;font-size:20px;box-shadow:0 4px 12px #2688e544;transition:.15s}#send:hover{background:#48a1f4;transform:translateY(-1px)}
+.composer-hint{text-align:center;color:#607487;font-size:10px;margin-top:8px}
+#profileBtn{display:none}
+#profilePanel{position:absolute;right:18px;top:62px;background:#1c2a38;border:1px solid #34495b;border-radius:14px;padding:15px;width:min(280px,calc(100vw - 28px));z-index:4;box-shadow:0 12px 40px #0008}
+.profileline{display:flex;align-items:center;gap:10px;margin-bottom:14px}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#7656c9;font-weight:bold}.small{font-size:12px;color:var(--muted)}
+.secondary{background:#263747;color:#eaf2f8;border:0;border-radius:9px;padding:10px 13px;width:100%;text-align:left}.secondary:hover{background:#32485c}
+.hidden{display:none!important}
+.authwrap{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 50% 15%,#1b4262 0%,#111d2a 42%,#0b121b 100%)}
+.auth{width:min(100%,410px);padding:30px;background:#172431;border:1px solid #304252;border-radius:22px;box-shadow:0 24px 90px #0008}
+.auth-logo{width:62px;height:62px;border-radius:20px;margin:0 auto 19px;display:grid;place-items:center;background:linear-gradient(145deg,#45b5ff,#2584db);font-size:29px;box-shadow:0 9px 25px #168de455}
+.auth h2{text-align:center;font-size:24px;letter-spacing:-.5px;margin:0 0 7px}.sub{text-align:center;color:#8fa2b4;font-size:13px;margin:0 auto 23px;line-height:1.55;max-width:300px}
+.field{display:block;width:100%;padding:14px 15px;margin:11px 0;background:#0f1a25;border:1px solid #304252;border-radius:11px;color:white;font-size:14px;outline:none;transition:.15s}.field:focus{border-color:#3999e9;box-shadow:0 0 0 3px #3390ec20}.field::placeholder{color:#71869a}
+.primary{width:100%;padding:14px;border:0;border-radius:11px;background:linear-gradient(100deg,#3390ec,#2684d9);color:white;font-weight:750;font-size:14px;margin-top:9px;box-shadow:0 6px 18px #2688e433}.primary:hover{filter:brightness(1.08)}
+.switch{width:100%;background:none;border:0;color:#69baf2;margin-top:16px;padding:8px;font-size:13px}.switch:hover{color:#a5d8ff}
+#error{color:#ff9999;font-size:12px;min-height:18px;text-align:center;margin-top:9px}.hidden{display:none!important}
+@media(max-width:680px){body{display:block}.app{grid-template-columns:1fr}.sidebar{display:none}.chat-header{height:62px;padding:0 13px}.header-actions{display:flex}#feed{padding:18px 12px}.bubble{max-width:86%}.composer-wrap{padding:9px 10px calc(10px + env(safe-area-inset-bottom))}.auth{padding:25px 21px}}
+@media(min-width:681px){body{padding:18px}.app{height:calc(100dvh - 36px);border:1px solid #2a3947;border-radius:15px}.sidebar{border-radius:14px 0 0 14px}.chatpane{border-radius:0 14px 14px 0;overflow:hidden}}
+</style></head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="side-top"><div class="brandmark">➤</div><div class="brand">My Chat<small>PRIVATE MESSENGER</small></div></div>
+  <div class="side-caption">Сообщения</div>
+  <div class="chat-list"><div class="chat-item active"><div class="chat-avatar">✦</div><div class="chat-copy"><div class="chat-name">Общий чат</div><div class="chat-preview">Переписка всех участников</div></div></div></div>
+  <div class="side-spacer"></div>
+  <div class="account"><div class="account-avatar" id="sideAvatar">?</div><div class="account-info"><div class="account-name" id="sideName">Профиль</div><div class="account-tag" id="sideHandle">Локальный аккаунт</div></div></div>
+</aside>
+<section class="chatpane">
+<header class="chat-header">
+  <div class="header-avatar">✦</div>
+  <div class="header-info"><div class="header-title">Общий чат</div><div class="header-sub" id="status">Подключаемся…</div></div>
+  <div class="header-actions"><button class="icon-btn" id="profileBtn" title="Профиль" aria-label="Профиль">•••</button></div>
+</header>
+<main id="feed"><div class="welcome-pill">✦ &nbsp; Добро пожаловать в My Chat</div><div class="empty"><div class="empty-icon">✉</div><b>Твоя переписка начинается здесь</b>Напиши сообщение — оно появится у других участников чата.</div></main>
+<div class="composer-wrap"><footer id="composer" class="hidden"><textarea id="message" rows="1" maxlength="4000" placeholder="Написать сообщение…"></textarea><button id="send" title="Отправить">➤</button></footer><div class="composer-hint">Enter — отправить · Shift + Enter — новая строка</div></div>
+<div id="profilePanel" class="hidden"><div class="profileline"><div class="avatar" id="avatar">?</div><div><b id="who"></b><div class="small" id="handle"></div></div></div><button class="secondary" id="logout">↪ &nbsp; Выйти из аккаунта</button></div>
+</section></div>
+<div class="authwrap" id="authWrap"><div class="auth">
+<div class="auth-logo">➤</div><h2 id="authTitle">С возвращением</h2><div class="sub" id="authSub">Войди в свой профиль, чтобы продолжить общение.</div>
+<form id="authForm"><input class="field" id="username" autocomplete="username" placeholder="Логин" minlength="3" maxlength="24" required pattern="[A-Za-zА-Яа-яЁё0-9_]+" title="Буквы, цифры и _">
+<input class="field hidden" id="display" autocomplete="nickname" placeholder="Имя, которое увидят другие" maxlength="32">
+<input class="field" id="password" type="password" autocomplete="current-password" placeholder="Пароль" minlength="6" required>
+<button class="primary" id="authSubmit">Войти в My Chat</button></form><div id="error"></div>
+<button class="switch" id="switchMode">Впервые здесь? Создать аккаунт</button>
+</div></div>
+<script>
+const $=id=>document.getElementById(id);
+let mode='login', me=null, lastId=0, polling=false;
+function authMode(m){mode=m;$('authTitle').textContent=m==='login'?'С возвращением':'Создать аккаунт';$('authSub').textContent=m==='login'?'Войди в свой профиль, чтобы продолжить общение.':'Придумай логин и пароль — твой профиль будет сохранён на этом компьютере.';$('display').classList.toggle('hidden',m==='login');$('display').required=m==='register';$('authSubmit').textContent=m==='login'?'Войти в My Chat':'Создать аккаунт';$('switchMode').textContent=m==='login'?'Впервые здесь? Создать аккаунт':'Уже есть аккаунт? Войти';$('error').textContent='';$('password').autocomplete=m==='login'?'current-password':'new-password';}
+$('switchMode').onclick=()=>authMode(mode==='login'?'register':'login');
+$('authForm').onsubmit=async e=>{e.preventDefault();$('error').textContent='';const payload={username:$('username').value.trim(),password:$('password').value,display:$('display').value.trim()};try{const r=await fetch('/api/'+mode,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw Error(d.error||'Не удалось выполнить вход');me=d.user;startChat();}catch(err){$('error').textContent=err.message;}};
+function startChat(){ $('authWrap').classList.add('hidden');$('composer').classList.remove('hidden');$('profileBtn').style.display='grid';$('who').textContent=me.display;$('handle').textContent='@'+me.username;$('avatar').textContent=me.display.slice(0,1).toUpperCase();$('sideAvatar').textContent=me.display.slice(0,1).toUpperCase();$('sideName').textContent=me.display;$('sideHandle').textContent='@'+me.username;$('status').textContent='в сети · '+me.display;$('feed').innerHTML='<div class="welcome-pill">✦ &nbsp; Добро пожаловать в My Chat</div>';lastId=0;poll();}
+$('profileBtn').onclick=()=>$('profilePanel').classList.toggle('hidden');
+$('logout').onclick=async()=>{await fetch('/api/logout',{method:'POST'});location.reload();};
+function addMessage(m){const empty=$('feed').querySelector('.empty');if(empty)empty.remove();const row=document.createElement('div');row.className='msgrow '+(m.user_id===me.id?'mine':'other');const b=document.createElement('div');b.className='bubble';if(m.user_id!==me.id){const s=document.createElement('div');s.className='sender';s.textContent=m.display+' · @'+m.username;b.appendChild(s);}const t=document.createElement('div');t.className='body';t.textContent=m.text;b.appendChild(t);const tm=document.createElement('div');tm.className='meta';tm.textContent=m.time;b.appendChild(tm);row.appendChild(b);$('feed').appendChild(row);$('feed').scrollTop=$('feed').scrollHeight;}
+async function poll(){if(polling||!me)return;polling=true;try{const r=await fetch('/api/messages?after='+lastId,{cache:'no-store'});if(r.status===401){location.reload();return;}if(!r.ok)throw Error();const d=await r.json();d.messages.forEach(m=>{addMessage(m);lastId=Math.max(lastId,m.id)});$('status').textContent='в сети · '+me.display;}catch(e){$('status').textContent='переподключение…';}finally{polling=false;if(me)setTimeout(poll,800);}}
+async function send(){const text=$('message').value.trim();if(!text)return;$('message').value='';$('message').style.height='42px';try{const r=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});if(!r.ok)throw Error();await poll();}catch(e){$('message').value=text;$('status').textContent='Не удалось отправить';}}
+$('send').onclick=send;$('message').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});$('message').addEventListener('input',()=>{$('message').style.height='42px';$('message').style.height=Math.min($('message').scrollHeight,130)+'px';});
+(async()=>{try{const r=await fetch('/api/me');if(r.ok){const d=await r.json();me=d.user;startChat();}}catch(e){} })();
+</script></body></html>
